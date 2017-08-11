@@ -882,8 +882,8 @@ shelljs@^0.7.5:
     rechoir "^0.6.2"
 
 shr-models@beta:
-  version "5.0.0-beta.3"
-  resolved "https://registry.yarnpkg.com/shr-models/-/shr-models-5.0.0-beta.3.tgz#cd57f7fe74cb397a43e77588e1c9f69a9785791d"
+  version "5.0.0-beta.4"
+  resolved "https://registry.yarnpkg.com/shr-models/-/shr-models-5.0.0-beta.4.tgz#89b0c8e610a2ec52ea4f9024df76bf63051ff46f"
 
 slice-ansi@0.0.4:
   version "0.0.4"
