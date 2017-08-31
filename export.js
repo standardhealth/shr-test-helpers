@@ -145,10 +145,6 @@ function addGroup(specs, ns, otherNS, addSubElements=true) {
     .withConcept(new mdl.Concept('http://boo.org', 'far', 'Boofar'))
     .withField(new mdl.IdentifiableValue(id('shr.test', 'Simple')).withMinMax(1, 1))
     .withField(new mdl.IdentifiableValue(id('shr.test', 'Coded')).withMinMax(0, 1))
-    .withField(new mdl.ChoiceValue().withMinMax(0, 2)
-      .withOption(new mdl.IdentifiableValue(id('shr.other.test', 'Simple')).withMinMax(1, 1))
-      .withOption(new mdl.IdentifiableValue(id('shr.test', 'ForeignElementValue')).withMinMax(1))
-    )
     .withField(new mdl.IdentifiableValue(id('shr.test', 'ElementValue')).withMinMax(0));
   add(specs, gr);
   if (addSubElements) {
@@ -163,16 +159,15 @@ function addGroup(specs, ns, otherNS, addSubElements=true) {
 
 function addGroupWithChoiceOfChoice(specs, ns, otherNS, addSubElements=true) {
   let gr = new mdl.DataElement(id(ns, 'GroupWithChoiceOfChoice'), true)
-    .withDescription('It is a group of elements with a choice containing a choice')
-    .withField(new mdl.IdentifiableValue(id('shr.test', 'Simple')).withMinMax(1, 1))
-    .withField(new mdl.IdentifiableValue(id('shr.test', 'Coded')).withMinMax(0, 1))
-    .withField(new mdl.ChoiceValue().withMinMax(0,2)
+    .withValue(new mdl.ChoiceValue().withMinMax(0,2)
       .withOption(new mdl.IdentifiableValue(id('shr.other.test', 'Simple')).withMinMax(1, 1))
       .withOption(new mdl.ChoiceValue().withMinMax(1, 1)
         .withOption(new mdl.IdentifiableValue(id('shr.test', 'ForeignElementValue')).withMinMax(1))
         .withOption(new mdl.IdentifiableValue(id('shr.test', 'ElementValue')).withMinMax(1))
-      )
-    );
+      ))
+    .withDescription('It is a group of elements with a choice containing a choice')
+    .withField(new mdl.IdentifiableValue(id('shr.test', 'Simple')).withMinMax(1, 1))
+    .withField(new mdl.IdentifiableValue(id('shr.test', 'Coded')).withMinMax(0, 1));
   add(specs, gr);
   if (addSubElements) {
     addSimpleElement(specs, ns);
