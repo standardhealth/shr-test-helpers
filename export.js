@@ -135,6 +135,18 @@ function commonExportTests(exportFn, expectedFn, expectedErrorsFn) {
       const expected = wrappedExpectedFns('GroupDerivative', this);
       checkExpected(expected);
     });
+
+    it('tbd value and fields', function() {
+      addTBDElement(_specs, 'shr.test');
+      const expected = wrappedExpectedFns('NotDone', this);
+      checkExpected(expected);
+    });
+
+    it('tbd inheritance', function() {
+      addTBDElementDerivative(_specs, 'shr.test');
+      const expected = wrappedExpectedFns('NotDoneDerivative', this);
+      checkExpected(expected);
+    });
   };
 }
 
@@ -293,6 +305,39 @@ function addChoiceOfChoice(specs, ns) {
       )
     );
   add(specs, de);
+  return de;
+}
+
+function addTBDElement(specs, ns) {
+  let de = new mdl.DataElement(id(ns, 'NotDone'), true)
+      .withDescription('It is an unfinished element')
+      .withConcept(new mdl.Concept('http://foo.org', 'bar', 'Foobar'))
+      .withValue(new mdl.TBD('An undetermined value.').withMinMax(1, 1))
+      .withField(new mdl.TBD('An undetermined list field.').withMinMax(0))
+      .withField(new mdl.TBD('An undetermined singular field.').withMinMax(1, 1))
+      .withField(new mdl.TBD('An undetermined field with no cardinality.'))
+      .withField(new mdl.TBD())
+      .withField(new mdl.TBD().withMinMax(1));
+  add(specs, de);
+  return de;
+}
+
+function addTBDElementDerivative(specs, ns, addSubElements=true) {
+  let de = new mdl.DataElement(id(ns, 'NotDoneDerivative'), true)
+      .withBasedOn(new mdl.TBD('An undetermined parent.'))
+      .withBasedOn(new mdl.TBD())
+      .withBasedOn(id('shr.test', 'ValuelessElement'))
+      .withDescription('It is an unfinished derivative element')
+      .withConcept(new mdl.TBD('Not sure of the concept'))
+      .withValue(new mdl.TBD('An undetermined list value.').withMinMax(0))
+      .withField(new mdl.TBD('An undetermined singular field.').withMinMax(1, 1));
+  add(specs, de);
+  if (addSubElements) {
+    add(specs, new mdl.DataElement(id(ns, 'ValuelessElement'), true)
+        .withDescription('An element with no value.')
+        .withField(new mdl.IdentifiableValue(id('shr.test', 'Simple')).withMinMax(1, 1)));
+    addSimpleElement(specs, ns);
+  }
   return de;
 }
 
