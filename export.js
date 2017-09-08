@@ -147,6 +147,12 @@ function commonExportTests(exportFn, expectedFn, expectedErrorsFn) {
       const expected = wrappedExpectedFns('NotDoneDerivative', this);
       checkExpected(expected);
     });
+
+    it('abstract and non-entry elements', function() {
+      addAbstractAndPlainElements(_specs, 'shr.test');
+      const expected = wrappedExpectedFns('AbstractAndPlainGroup', this);
+      checkExpected(expected);
+    });
   };
 }
 
@@ -339,6 +345,23 @@ function addTBDElementDerivative(specs, ns, addSubElements=true) {
     addSimpleElement(specs, ns);
   }
   return de;
+}
+
+function addAbstractAndPlainElements(specs, ns, addSubElements=true) {
+  let gr = new mdl.DataElement(id(ns, 'AbstractAndPlainGroup'), true, true)
+      .withDescription('It is an abstract group of elements')
+      .withConcept(new mdl.Concept('http://foo.org', 'bar', 'Foobar'))
+      .withField(new mdl.IdentifiableValue(id('shr.test', 'Simple')).withMinMax(1, 1))
+      .withField(new mdl.IdentifiableValue(id('shr.test', 'Plain')).withMinMax(1, 1));
+  add(specs, gr);
+  if (addSubElements) {
+    addSimpleElement(specs, ns);
+    add(specs, new mdl.DataElement(id(ns, 'Plain'))
+        .withDescription('It is not an entry element')
+        .withConcept(new mdl.Concept('http://foo.org', 'bar', 'Foobar'))
+        .withValue(new mdl.IdentifiableValue(pid('string')).withMinMax(1, 1)));
+  }
+  return gr;
 }
 
 function add(specs, ...dataElements) {
