@@ -79,6 +79,12 @@ function commonExportTests(exportFn, expectedFn, expectedErrorsFn) {
       checkExpected(expected);
     });
 
+    it('should correctly export a choice of references', function() {
+      addReferenceChoice(_specs, 'shr.test', 'shr.other.test');
+      const expected = wrappedExpectedFns('ReferenceChoice', this);
+      checkExpected(expected);
+    });
+
     it('should correctly export an entry with an element value', function() {
       // NOTE: This is an entry where the value is not a primitive, e.g. "Value: SomeOtherDataElement"
       addElementValue(_specs, 'shr.test');
@@ -247,6 +253,17 @@ function addSimpleReference(specs, ns) {
     .withValue(new mdl.RefValue(id(ns, 'Simple')).withMinMax(1, 1));
   add(specs, de);
   return de;
+}
+
+function addReferenceChoice(specs, ns, otherNS) {
+  let ch = new mdl.DataElement(id(ns, 'ReferenceChoice'), true)
+      .withDescription('It is a reference to one of a few types')
+      .withValue(new mdl.ChoiceValue().withMinMax(1, 1)
+          .withOption(new mdl.RefValue(id(otherNS, 'Simple')).withMinMax(1, 1))
+          .withOption(new mdl.RefValue(id(ns, 'Coded')).withMinMax(1, 1))
+      );
+  add(specs, ch);
+  return ch;
 }
 
 function addTwoDeepElementValue(specs, ns, addSubElement=true) {
