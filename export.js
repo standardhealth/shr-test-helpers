@@ -159,6 +159,18 @@ function commonExportTests(exportFn, expectedFn, expectedErrorsFn) {
       const expected = wrappedExpectedFns('AbstractAndPlainGroup', this);
       checkExpected(expected);
     });
+
+    it('should correctly export elements with type constraints', function() {
+      addTypeConstrainedElements(_specs, 'shr.test', 'shr.other.test');
+      const expected = wrappedExpectedFns('TypeConstraints', this);
+      checkExpected(expected);
+    });
+    it('should correctly export nested elements with type constraints', function() {
+      addTypeConstrainedElementsWithPath(_specs, 'shr.test');
+      const expected = wrappedExpectedFns('TypeConstraintsWithPath', this);
+      checkExpected(expected);
+    });
+
   };
 }
 
@@ -379,6 +391,54 @@ function addAbstractAndPlainElements(specs, ns, addSubElements=true) {
         .withValue(new mdl.IdentifiableValue(pid('string')).withMinMax(1, 1)));
   }
   return gr;
+}
+
+function addTypeConstrainedElements(specs, ns, otherNS, addSubElements=true) {
+  addSimpleChildElement(specs, ns);
+  let gd = new mdl.DataElement(id(ns, 'GroupDerivative'), true)
+      .withBasedOn(id('shr.test', 'Group'))
+      .withDescription('It is a derivative of a group of elements with type constraints.')
+      .withField(new mdl.IdentifiableValue(id(ns, 'Simple')).withMinMax(1, 1).withConstraint(new mdl.TypeConstraint(id(ns, 'SimpleChild'))))
+      .withField(new mdl.IdentifiableValue(id(ns, 'ElementValue')).withMinMax(0).withConstraint(new mdl.TypeConstraint(id(ns, 'SimpleChild'), undefined, true)))
+  add(specs, gd);
+  if (addSubElements) {
+    addGroup(specs, ns, otherNS, addSubElements);
+  }
+  return gd;
+}
+
+function addTypeConstrainedElementsWithPath(specs, ns, addSubElements=true) {
+  let ef = new mdl.DataElement(id(ns, 'ElementField'), true)
+      .withDescription('It is an element with a field.')
+      .withField(new mdl.IdentifiableValue(id(ns, 'Simple')).withMinMax(1, 1));
+  let td = new mdl.DataElement(id(ns, 'TwoDeepElementField'), true)
+      .withDescription('It is an element with a two-deep element field')
+      .withField(new mdl.IdentifiableValue(id(ns, 'ElementField')).withMinMax(1, 1));
+  let nf = new mdl.DataElement(id(ns, 'NestedField'), true)
+      .withDescription('It is an element with a nested field.')
+      .withField(new mdl.IdentifiableValue(id(ns, 'TwoDeepElementField')));
+  let cp = new mdl.DataElement(id(ns, 'ConstrainedPath'), true)
+      .withBasedOn(id('shr.test', 'NestedField'))
+      .withDescription('It derives an element with a nested field.')
+      .withField(new mdl.IdentifiableValue(id(ns, 'TwoDeepElementField')).withConstraint(new mdl.TypeConstraint(id(ns, 'SimpleChild'), [id(ns, 'ElementField'), id(ns, 'Simple')])));
+  add(specs, ef);
+  add(specs, td);
+  add(specs, nf);
+  add(specs, cp);
+  if (addSubElements) {
+    addSimpleElement(specs, ns);
+    addSimpleChildElement(specs, ns);
+  }
+  return cp;
+}
+
+
+function addSimpleChildElement(specs, ns) {
+  let sc1 = new mdl.DataElement(id(ns, 'SimpleChild'), true)
+      .withBasedOn(id(ns, 'Simple'))
+      .withDescription('A derivative of the simple type.')
+      .withValue(new mdl.IdentifiableValue(pid('string')).withMinMax(1, 1));
+  add(specs, sc1);
 }
 
 function add(specs, ...dataElements) {
