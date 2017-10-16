@@ -25,7 +25,9 @@ function commonExportTests(exportFn, expectedFn, expectedErrorsFn) {
     let _specs;
     let checkExpected = function(expected) {
       expect(exportFn(_specs)).to.eql(expected.result);
-      expect(err.errors().length).to.equal(expected.errors.length);
+      if (err.errors().length !== expected.errors.length) {
+        expect(err.errors()).to.deep.equal(expected.errors);
+      }
       for (let i=0; i < expected.errors.length; i++) {
         const expErr = expected.errors[i];
         const actErr = err.errors()[i];
