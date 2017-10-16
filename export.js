@@ -350,8 +350,6 @@ function addTBDElement(specs, ns) {
       .withValue(new mdl.TBD('An undetermined value.').withMinMax(1, 1))
       .withField(new mdl.TBD('An undetermined list field.').withMinMax(0))
       .withField(new mdl.TBD('An undetermined singular field.').withMinMax(1, 1))
-      .withField(new mdl.TBD('An undetermined field with no cardinality.'))
-      .withField(new mdl.TBD())
       .withField(new mdl.TBD().withMinMax(1));
   add(specs, de);
   return de;
