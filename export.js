@@ -171,6 +171,11 @@ function commonExportTests(exportFn, expectedFn, expectedErrorsFn) {
       checkExpected(expected);
     });
 
+    it('should correctly export includes type constraints', function() {
+      addIncludesTypeConstraints(_specs, 'shr.test');
+      const expected = wrappedExpectedFns('IncludesTypeConstraints', this);
+      checkExpected(expected);
+    });
   };
 }
 
@@ -430,6 +435,25 @@ function addTypeConstrainedElementsWithPath(specs, ns, addSubElements=true) {
   return cp;
 }
 
+function addIncludesTypeConstraints(specs, ns, addSubElements=true) {
+  let sc2 = new mdl.DataElement(id(ns, 'SimpleChild2'), true)
+      .withBasedOn(id(ns, 'Simple'))
+      .withDescription('A derivative of the simple type.')
+      .withValue(new mdl.IdentifiableValue(pid('string')).withMinMax(1, 1));
+  let de = new mdl.DataElement(id(ns, 'IncludesTypesList'), true)
+      .withDescription('An entry with a includes types constraints.')
+      .withValue(new mdl.IdentifiableValue(id(ns, 'Simple')).withMinMax(0)
+          .withConstraint(new mdl.IncludesTypeConstraint(id(ns, 'SimpleChild'), new mdl.Cardinality(0, 1)))
+          .withConstraint(new mdl.IncludesTypeConstraint(id(ns, 'SimpleChild2'), new mdl.Cardinality(0, 2)))
+  );
+  add(specs, sc2);
+  add(specs, de);
+  if (addSubElements) {
+    addSimpleElement(specs, ns);
+    addSimpleChildElement(specs, ns);
+  }
+  return de;
+}
 
 function addSimpleChildElement(specs, ns) {
   let sc1 = new mdl.DataElement(id(ns, 'SimpleChild'), true)
