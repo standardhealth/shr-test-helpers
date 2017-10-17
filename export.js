@@ -419,7 +419,7 @@ function addTypeConstrainedElementsWithPath(specs, ns, addSubElements=true) {
       .withField(new mdl.IdentifiableValue(id(ns, 'ElementField')).withMinMax(1, 1));
   let nf = new mdl.DataElement(id(ns, 'NestedField'), true)
       .withDescription('It is an element with a nested field.')
-      .withField(new mdl.IdentifiableValue(id(ns, 'TwoDeepElementField')));
+      .withField(new mdl.IdentifiableValue(id(ns, 'TwoDeepElementField')).withMinMax(0, 1));
   let cp = new mdl.DataElement(id(ns, 'ConstrainedPath'), true)
       .withBasedOn(id('shr.test', 'NestedField'))
       .withDescription('It derives an element with a nested field.')
