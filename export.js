@@ -424,10 +424,14 @@ function addTypeConstrainedElementsWithPath(specs, ns, addSubElements=true) {
       .withBasedOn(id('shr.test', 'NestedField'))
       .withDescription('It derives an element with a nested field.')
       .withField(new mdl.IdentifiableValue(id(ns, 'TwoDeepElementField')).withConstraint(new mdl.TypeConstraint(id(ns, 'SimpleChild'), [id(ns, 'ElementField'), id(ns, 'Simple')])));
+  let cpni = new mdl.DataElement(id(ns, 'ConstrainedPathNoInheritance'), true)
+      .withDescription('It has a new field with a nested constraint.')
+      .withField(new mdl.IdentifiableValue(id(ns, 'TwoDeepElementField')).withMinMax(0, 1).withConstraint(new mdl.TypeConstraint(id(ns, 'SimpleChild'), [id(ns, 'ElementField'), id(ns, 'Simple')])));
   add(specs, ef);
   add(specs, td);
   add(specs, nf);
   add(specs, cp);
+  add(specs, cpni);
   if (addSubElements) {
     addSimpleElement(specs, ns);
     addSimpleChildElement(specs, ns);
