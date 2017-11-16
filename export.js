@@ -176,6 +176,12 @@ function commonExportTests(exportFn, expectedFn, expectedErrorsFn) {
       const expected = wrappedExpectedFns('IncludesTypeConstraints', this);
       checkExpected(expected);
     });
+
+    it('should correctly export an element with nested valueset constraints', function() {
+      addValueSetConstraints(_specs, 'shr.test', 'shr.other.test');
+      const expected = wrappedExpectedFns('NestedValueSetConstraints', this);
+      checkExpected(expected);
+    });
   };
 }
 
@@ -457,6 +463,20 @@ function addIncludesTypeConstraints(specs, ns, addSubElements=true) {
     addSimpleChildElement(specs, ns);
   }
   return de;
+}
+
+function addValueSetConstraints(specs, ns, otherNS, addSubElements=true) {
+  let gd = new mdl.DataElement(id(ns, 'NestedValueSetConstraints'), true)
+      .withBasedOn(id('shr.test', 'Group'))
+      .withDescription('It has valueset constraints on a field.')
+      .withField(new mdl.IdentifiableValue(id('shr.test', 'Coded'))
+        .withConstraint(new mdl.ValueSetConstraint('http://standardhealthrecord.org/test/vs/Coded2'))
+  );
+  add(specs, gd);
+  if (addSubElements) {
+    addGroup(specs, ns, otherNS, addSubElements);
+  }
+  return gd;
 }
 
 function addSimpleChildElement(specs, ns) {
