@@ -182,6 +182,12 @@ function commonExportTests(exportFn, expectedFn, expectedErrorsFn) {
       const expected = wrappedExpectedFns('NestedValueSetConstraints', this);
       checkExpected(expected);
     });
+
+    it('should correctly export an element with boolean and code constraints', function() {
+      addConstConstraints(_specs, 'shr.test', 'shr.other.test');
+      const expected = wrappedExpectedFns('BooleanAndCodeConstraints', this);
+      checkExpected(expected);
+    });
   };
 }
 
@@ -477,6 +483,26 @@ function addValueSetConstraints(specs, ns, otherNS, addSubElements=true) {
     addGroup(specs, ns, otherNS, addSubElements);
   }
   return gd;
+}
+
+function addConstConstraints(specs, ns, otherNS, addSubElements=true) {
+  let bl = new mdl.DataElement(id(ns, 'Bool'), false)
+    .withDescription('A boolean element.')
+      .withValue(new mdl.IdentifiableValue(pid('boolean')).withMinMax(0, 1));
+  let cc = new mdl.DataElement(id(ns, 'BooleanAndCodeConstraints'), true)
+    .withBasedOn(id('shr.test', 'Group'))
+    .withDescription('It has boolean and code constraints.')
+    .withValue(new mdl.IdentifiableValue(pid('boolean')).withMinMax(1, 1).withConstraint(new mdl.BooleanConstraint(true)))
+    .withField(new mdl.IdentifiableValue(id(ns, 'Coded'))
+      .withConstraint(new mdl.CodeConstraint(new mdl.Concept('http://foo.org', 'bar', 'Foobar'))))
+    .withField(new mdl.IdentifiableValue(id(ns, 'Bool')).withMinMax(0, 1)
+      .withConstraint(new mdl.BooleanConstraint(false)));
+
+  add(specs, bl, cc);
+  if (addSubElements) {
+    addGroup(specs, ns, otherNS, addSubElements);
+  }
+  return cc;
 }
 
 function addSimpleChildElement(specs, ns) {
