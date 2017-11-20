@@ -183,6 +183,12 @@ function commonExportTests(exportFn, expectedFn, expectedErrorsFn) {
       checkExpected(expected);
     });
 
+    it('should correctly export an element with valueset constraints on a choice', function() {
+      addValueSetChoiceConstraints(_specs, 'shr.test');
+      const expected = wrappedExpectedFns('ChoiceValueSetConstraint', this);
+      checkExpected(expected);
+    });
+
     it('should correctly export an element with boolean and code constraints', function() {
       addConstConstraints(_specs, 'shr.test', 'shr.other.test');
       const expected = wrappedExpectedFns('BooleanAndCodeConstraints', this);
@@ -483,6 +489,25 @@ function addValueSetConstraints(specs, ns, otherNS, addSubElements=true) {
     addGroup(specs, ns, otherNS, addSubElements);
   }
   return gd;
+}
+
+function addValueSetChoiceConstraints(specs, ns, addSubElements=true) {
+  let cc = new mdl.DataElement(id(ns, 'CodedChoice'), true)
+    .withDescription('An element with a choice of code fields.')
+    .withValue(new mdl.ChoiceValue().withMinMax(0, 1)
+      .withOption(new mdl.IdentifiableValue(id(ns, 'Coded')).withMinMax(1, 1))
+      .withOption(new mdl.IdentifiableValue(pid('code')).withMinMax(1, 1))
+    );
+  let de = new mdl.DataElement(id(ns, 'ChoiceValueSetConstraint'), true)
+    .withDescription('It has valueset constraints on a choice field.')
+    .withField(new mdl.IdentifiableValue(id(ns, 'CodedChoice')).withMinMax(0, 1)
+      .withConstraint(new mdl.ValueSetConstraint('http://standardhealthrecord.org/test/vs/Coded2').withBindingStrength(mdl.PREFERRED))
+    );
+  add(specs, cc, de);
+  if (addSubElements) {
+    addCodedElement(specs, ns);
+  }
+  return de;
 }
 
 function addConstConstraints(specs, ns, otherNS, addSubElements=true) {
