@@ -177,6 +177,12 @@ function commonExportTests(exportFn, expectedFn, expectedErrorsFn) {
       checkExpected(expected);
     });
 
+    it('should correctly export includes code constraints', function() {
+      addIncludesCodeConstraints(_specs, 'shr.test');
+      const expected = wrappedExpectedFns('IncludesCodeConstraints', this);
+      checkExpected(expected);
+    });
+
     it('should correctly export an element with nested valueset constraints', function() {
       addValueSetConstraints(_specs, 'shr.test', 'shr.other.test');
       const expected = wrappedExpectedFns('NestedValueSetConstraints', this);
@@ -473,6 +479,20 @@ function addIncludesTypeConstraints(specs, ns, addSubElements=true) {
   if (addSubElements) {
     addSimpleElement(specs, ns);
     addSimpleChildElement(specs, ns);
+  }
+  return de;
+}
+
+function addIncludesCodeConstraints(specs, ns, addSubElements=true) {
+  let de = new mdl.DataElement(id(ns, 'IncludesCodesList'), true)
+    .withDescription('An entry with a includes codes constraint.')
+    .withValue(new mdl.IdentifiableValue(id(ns, 'Coded')).withMinMax(0)
+      .withConstraint(new mdl.IncludesCodeConstraint(new mdl.Concept('http://foo.org', 'bar', 'Foobar')))
+      .withConstraint(new mdl.IncludesCodeConstraint(new mdl.Concept('http://boo.org', 'far', 'Boofar')))
+    );
+  add(specs, de);
+  if (addSubElements) {
+    addCodedElement(specs, ns);
   }
   return de;
 }
