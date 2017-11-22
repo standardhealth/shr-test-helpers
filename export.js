@@ -165,6 +165,11 @@ function commonExportTests(exportFn, expectedFn, expectedErrorsFn) {
       const expected = wrappedExpectedFns('NestedCardConstraint', this);
       checkExpected(expected);
     });
+    it('should correctly export elements with nested cardinality constraints on lists', function() {
+      addNestedListCardConstrainedElements(_specs, 'shr.test');
+      const expected = wrappedExpectedFns('NestedListCardConstraints', this);
+      checkExpected(expected);
+    });
     it('should correctly export elements with type constraints', function() {
       addTypeConstrainedElements(_specs, 'shr.test', 'shr.other.test');
       const expected = wrappedExpectedFns('TypeConstraints', this);
@@ -437,6 +442,22 @@ function addNestedCardConstrainedElement(specs, ns, addSubElements=true) {
       .withField(new mdl.IdentifiableValue(id(ns, 'OptionalField'))
         .withMinMax(1, 1)
         .withConstraint(new mdl.CardConstraint(new mdl.Cardinality(1, 1), [id(ns, 'OptionalValue')])));
+  add(specs, ov, of, de);
+  return de;
+}
+
+function addNestedListCardConstrainedElements(specs, ns, addSubElements=true) {
+  let ov = new mdl.DataElement(id(ns, 'OptionalList'))
+      .withDescription('An element with an optional list.')
+      .withValue(new mdl.IdentifiableValue(pid('string')).withMinMax(0));
+  let of = new mdl.DataElement(id(ns, 'ListField'))
+      .withDescription('An element with a list field.')
+      .withField(new mdl.IdentifiableValue(id(ns, 'OptionalList')).withMinMax(1, 1));
+  let de = new mdl.DataElement(id(ns, 'NestedListCardConstraints'), true)
+      .withDescription('It has a field with a nested card constraint on a list.')
+      .withField(new mdl.IdentifiableValue(id(ns, 'ListField'))
+          .withMinMax(1, 1)
+          .withConstraint(new mdl.CardConstraint(new mdl.Cardinality(2, 10), [id(ns, 'OptionalList'), pid('string')])));
   add(specs, ov, of, de);
   return de;
 }
