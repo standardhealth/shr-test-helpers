@@ -14,6 +14,7 @@
     "lint:fix": "./node_modules/.bin/eslint . --fix"
   },
   "dependencies": {
+    "assertion-error": "^1.0.2",
     "bunyan": "^1.8.9",
     "shr-models": "^5.2.0"
   },
