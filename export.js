@@ -180,6 +180,11 @@ function commonExportTests(exportFn, expectedFn, expectedErrorsFn) {
       const expected = wrappedExpectedFns('TypeConstraintsWithPath', this);
       checkExpected(expected);
     });
+    it('should correctly export choices with type constraints', function() {
+      addTypeConstrainedChoices(_specs, 'shr.test');
+      const expected = wrappedExpectedFns('TypeConstrainedChoices', this);
+      checkExpected(expected);
+    });
 
     it('should correctly export includes type constraints', function() {
       addIncludesTypeConstraints(_specs, 'shr.test');
@@ -503,6 +508,30 @@ function addTypeConstrainedElementsWithPath(specs, ns, addSubElements=true) {
     addSimpleChildElement(specs, ns);
   }
   return cp;
+}
+
+function addTypeConstrainedChoices(specs, ns, addSubElements=true) {
+  let tcc = new mdl.DataElement(id(ns, 'TypeConstrainedChoice'), true)
+    .withDescription('It is an element with a choice with a constraint.')
+    .withField(new mdl.IdentifiableValue(id(ns, 'Choice')).withMinMax(1, 1)
+      .withConstraint(new mdl.TypeConstraint(pid('string')).withOnValue(true))
+    );
+  let cv = new mdl.DataElement(id(ns, 'ChoiceValue'), true)
+    .withDescription('It is an element with a choice value.')
+    .withValue(new mdl.IdentifiableValue(id(ns, 'Choice')).withMinMax(1, 1));
+  let td = new mdl.DataElement(id(ns, 'TwoDeepChoiceField'), true)
+    .withDescription('It is an element with a a field with a choice.')
+    .withField(new mdl.IdentifiableValue(id(ns, 'ChoiceValue')).withMinMax(0, 1));
+  let tccp = new mdl.DataElement(id(ns, 'TypeConstrainedChoiceWithPath'), true)
+    .withDescription('It is an element with a choice on a field with a constraint.')
+    .withField(new mdl.IdentifiableValue(id(ns, 'TwoDeepChoiceField')).withMinMax(0, 1)
+      .withConstraint(new mdl.TypeConstraint(id(ns, 'Coded'), [id(ns, 'ChoiceValue'), id(ns, 'Choice')], true))
+    );
+  add(specs, tcc, cv, td, tccp);
+  if (addSubElements) {
+    addChoice(specs, ns);
+  }
+  return tccp;
 }
 
 function addIncludesTypeConstraints(specs, ns, addSubElements=true) {
