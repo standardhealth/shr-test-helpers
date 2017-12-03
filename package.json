@@ -16,7 +16,7 @@
   "dependencies": {
     "assertion-error": "^1.0.2",
     "bunyan": "^1.8.9",
-    "shr-models": "^5.2.0"
+    "shr-models": "^5.2.1"
   },
   "devDependencies": {
     "chai": "^3.5.0",
