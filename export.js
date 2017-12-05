@@ -1,5 +1,4 @@
 const {expect} = require('chai');
-const AssertionError = require('assertion-error');
 const err = require('./errors.js');
 const mdl = require('shr-models');
 
@@ -16,7 +15,7 @@ function commonExportTests(exportFn, expectedFn, expectedErrorsFn) {
         errors: expectedErrorsFn(name)
       };
     } catch (e) {
-      if (e instanceof AssertionError) {
+      if (e instanceof Error && e.name === 'AssertionError') {
         throw e;
       }
       const msg = `Skipping ${name} test.  Failed to load expected values/errors: ${e}`;
