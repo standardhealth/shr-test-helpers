@@ -13,15 +13,12 @@
     "lint": "./node_modules/.bin/eslint .",
     "lint:fix": "./node_modules/.bin/eslint . --fix"
   },
-  "dependencies": {
-    "bunyan": "^1.8.9"
-  },
   "devDependencies": {
-    "chai": "^3.5.0",
-    "eslint": "^3.6.1",
-    "mocha": "^3.2.0"
+    "eslint": "^3.6.1"
   },
   "peerDependencies": {
+    "bunyan": "^1.8.9",
+    "chai": "^3.5.0",
     "shr-models": "^5.2.0"
   }
 }
