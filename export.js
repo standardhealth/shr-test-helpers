@@ -1,16 +1,26 @@
 const {expect} = require('chai');
+const fs = require('fs-extra');
+const path = require('path');
 const err = require('./errors.js');
 const mdl = require('shr-models');
 
-function commonExportTests(exportFn, expectedFn, expectedErrorsFn) {
+function commonExportTests(exportFn, expectedFn, expectedErrorsFn, resultsPath, clean=true) {
   if (typeof expectedErrorsFn === 'undefined') {
     // default to expecting no errors
     expectedErrorsFn = function() { return []; };
   }
 
+  if (resultsPath) {
+    if (clean) {
+      fs.removeSync(resultsPath);
+    }
+    fs.mkdirpSync(resultsPath);
+  }
+
   const wrappedExpectedFns = function(name, testCase) {
     try {
       return {
+        name,
         result: expectedFn(name),
         errors: expectedErrorsFn(name)
       };
@@ -28,12 +38,22 @@ function commonExportTests(exportFn, expectedFn, expectedErrorsFn) {
     let _specs;
     let checkExpected = function(expected) {
       try {
-        expect(exportFn(_specs)).to.eql(expected.result);
+        const result = exportFn(_specs);
+        if (resultsPath) {
+          // Write out the actual results to the specified path
+          const ext = typeof result === 'object' ? 'json' : 'txt';
+          fs.writeFileSync(path.join(resultsPath, `${expected.name}.${ext}`), JSON.stringify(result, null, 2));
+        }
+        expect(result).to.eql(expected.result);
       } catch (ex) {
         if (err.errors().length) {
-          console.log('Test failed, additional errors that occurred while executing the test are', err.errors());
+          console.error('Test failed, additional errors that occurred while executing the test are', err.errors());
+          fs.writeFileSync(path.join(resultsPath, `${expected.name}_errors.json`), JSON.stringify(err.errors(), null, 2));
         }
         throw ex;
+      }
+      if (err.hasErrors()) {
+        fs.writeFileSync(path.join(resultsPath, `${expected.name}_errors.json`), JSON.stringify(err.errors(), null, 2));
       }
       if (err.errors().length !== expected.errors.length) {
         expect(err.errors()).to.deep.equal(expected.errors);
