@@ -615,8 +615,8 @@ function addValueSetConstraints(specs, ns, otherNS, addSubElements=true) {
   let gd = new mdl.DataElement(id(ns, 'NestedValueSetConstraints'), true)
       .withBasedOn(id('shr.test', 'Group'))
       .withDescription('It has valueset constraints on a field.')
-      .withField(new mdl.IdentifiableValue(id('shr.test', 'Coded'))
-        .withConstraint(new mdl.ValueSetConstraint('http://standardhealthrecord.org/test/vs/Coded2'))
+      .withField(new mdl.IdentifiableValue(id('shr.test', 'Coded')).withMinMax(0, 1)
+        .withConstraint(new mdl.ValueSetConstraint('http://standardhealthrecord.org/test/vs/Coded2', [pid('code')]).withBindingStrength(mdl.REQUIRED))
   );
   add(specs, gd);
   if (addSubElements) {
@@ -635,7 +635,7 @@ function addValueSetChoiceConstraints(specs, ns, addSubElements=true) {
   let de = new mdl.DataElement(id(ns, 'ChoiceValueSetConstraint'), true)
     .withDescription('It has valueset constraints on a choice field.')
     .withField(new mdl.IdentifiableValue(id(ns, 'CodedChoice')).withMinMax(0, 1)
-      .withConstraint(new mdl.ValueSetConstraint('http://standardhealthrecord.org/test/vs/Coded2').withBindingStrength(mdl.PREFERRED))
+      .withConstraint(new mdl.ValueSetConstraint('http://standardhealthrecord.org/test/vs/Coded2', [pid('code')]).withBindingStrength(mdl.PREFERRED))
     );
   add(specs, cc, de);
   if (addSubElements) {
