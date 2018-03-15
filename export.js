@@ -220,6 +220,18 @@ function commonExportTests(exportFn, expectedFn, expectedErrorsFn, resultsPath, 
       checkExpected(expected);
     });
 
+    it('should correctly export includes type constraints set on a field\'s value', function() {
+      addOnValueIncludesTypeConstraints(_specs, 'shr.test');
+      const expected = wrappedExpectedFns('OnValueIncludesTypeConstraints', this);
+      checkExpected(expected);
+    });
+
+    it('should correctly export nested includes type constraints', function() {
+      addNestedIncludesTypeConstraints(_specs, 'shr.test');
+      const expected = wrappedExpectedFns('NestedIncludesTypeConstraints', this);
+      checkExpected(expected);
+    });
+
     it('should correctly export includes code constraints', function() {
       addIncludesCodeConstraints(_specs, 'shr.test');
       const expected = wrappedExpectedFns('IncludesCodeConstraints', this);
@@ -596,6 +608,53 @@ function addIncludesTypeConstraints(specs, ns, addSubElements=true) {
   );
   add(specs, sc2);
   add(specs, de);
+  if (addSubElements) {
+    addSimpleElement(specs, ns);
+    addSimpleChildElement(specs, ns);
+  }
+  return de;
+}
+
+function addOnValueIncludesTypeConstraints(specs, ns, addSubElements=true) {
+  let evl = new mdl.DataElement(id(ns, 'ElementValueList'), false, false)
+      .withDescription('It is an element with a value that is a list of elements')
+      .withValue(new mdl.IdentifiableValue(id(ns, 'Simple')).withMinMax(0));
+  let sc2 = new mdl.DataElement(id(ns, 'SimpleChild2'), true)
+      .withBasedOn(id(ns, 'Simple'))
+      .withDescription('A derivative of the simple type.')
+      .withValue(new mdl.IdentifiableValue(pid('string')).withMinMax(1, 1));
+  let de = new mdl.DataElement(id(ns, 'OnValueIncludesTypeConstraints'), true)
+      .withDescription('An entry with includes types constraints that are on the value of the field.')
+      .withField(new mdl.IdentifiableValue(id(ns, 'ElementValueList')).withMinMax(0, 1)
+        .withConstraint(new mdl.IncludesTypeConstraint(id(ns, 'SimpleChild'), new mdl.Cardinality(0, 1), [], true))
+        .withConstraint(new mdl.IncludesTypeConstraint(id(ns, 'SimpleChild2'), new mdl.Cardinality(0, 2), [], true))
+  );
+  add(specs, evl, sc2, de);
+  if (addSubElements) {
+    addSimpleElement(specs, ns);
+    addSimpleChildElement(specs, ns);
+  }
+  return de;
+}
+
+function addNestedIncludesTypeConstraints(specs, ns, addSubElements=true) {
+  let efl = new mdl.DataElement(id(ns, 'ElementFieldList'), false, false)
+      .withDescription('It is an element with a field that is a list of elements')
+      .withField(new mdl.IdentifiableValue(id(ns, 'Simple')).withMinMax(0));
+  let eflc = new mdl.DataElement(id(ns, 'ElementFieldListContainer'), false, false)
+      .withDescription('It is an element with a field that contains an element with a field that is a list of elements')
+      .withField(new mdl.IdentifiableValue(id(ns, 'ElementFieldList')).withMinMax(0,1));
+  let sc2 = new mdl.DataElement(id(ns, 'SimpleChild2'), true)
+      .withBasedOn(id(ns, 'Simple'))
+      .withDescription('A derivative of the simple type.')
+      .withValue(new mdl.IdentifiableValue(pid('string')).withMinMax(1, 1));
+  let de = new mdl.DataElement(id(ns, 'NestedIncludesTypeConstraints'), true)
+      .withDescription('An entry with includes types constraints that are on a nested field.')
+      .withField(new mdl.IdentifiableValue(id(ns, 'ElementFieldListContainer')).withMinMax(0, 1)
+        .withConstraint(new mdl.IncludesTypeConstraint(id(ns, 'SimpleChild'), new mdl.Cardinality(0, 1), [id(ns, 'ElementFieldList'), id(ns, 'Simple')], false))
+        .withConstraint(new mdl.IncludesTypeConstraint(id(ns, 'SimpleChild2'), new mdl.Cardinality(0, 2), [id(ns, 'ElementFieldList'), id(ns, 'Simple')], false))
+  );
+  add(specs, efl, eflc, sc2, de);
   if (addSubElements) {
     addSimpleElement(specs, ns);
     addSimpleChildElement(specs, ns);
