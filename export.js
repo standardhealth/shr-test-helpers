@@ -243,6 +243,12 @@ function commonExportTests(exportFn, expectedFn, expectedErrorsFn, resultsPath, 
       const expected = wrappedExpectedFns('BooleanAndCodeConstraints', this);
       checkExpected(expected);
     });
+
+    it('should correctly export an element with code/Coding/CodeableConcept constraints', function() {
+      addFixedCodeExtravaganza(_specs, 'shr.test');
+      const expected = wrappedExpectedFns('FixedCodeExtravaganza', this);
+      checkExpected(expected);
+    });
   };
 }
 
@@ -615,8 +621,8 @@ function addValueSetConstraints(specs, ns, otherNS, addSubElements=true) {
   let gd = new mdl.DataElement(id(ns, 'NestedValueSetConstraints'), true)
       .withBasedOn(id('shr.test', 'Group'))
       .withDescription('It has valueset constraints on a field.')
-      .withField(new mdl.IdentifiableValue(id('shr.test', 'Coded'))
-        .withConstraint(new mdl.ValueSetConstraint('http://standardhealthrecord.org/test/vs/Coded2'))
+      .withField(new mdl.IdentifiableValue(id('shr.test', 'Coded')).withMinMax(0, 1)
+        .withConstraint(new mdl.ValueSetConstraint('http://standardhealthrecord.org/test/vs/Coded2', [pid('code')]).withBindingStrength(mdl.REQUIRED))
   );
   add(specs, gd);
   if (addSubElements) {
@@ -635,7 +641,7 @@ function addValueSetChoiceConstraints(specs, ns, addSubElements=true) {
   let de = new mdl.DataElement(id(ns, 'ChoiceValueSetConstraint'), true)
     .withDescription('It has valueset constraints on a choice field.')
     .withField(new mdl.IdentifiableValue(id(ns, 'CodedChoice')).withMinMax(0, 1)
-      .withConstraint(new mdl.ValueSetConstraint('http://standardhealthrecord.org/test/vs/Coded2').withBindingStrength(mdl.PREFERRED))
+      .withConstraint(new mdl.ValueSetConstraint('http://standardhealthrecord.org/test/vs/Coded2', [pid('code')]).withBindingStrength(mdl.PREFERRED))
     );
   add(specs, cc, de);
   if (addSubElements) {
@@ -652,8 +658,8 @@ function addConstConstraints(specs, ns, otherNS, addSubElements=true) {
     .withBasedOn(id('shr.test', 'Group'))
     .withDescription('It has boolean and code constraints.')
     .withValue(new mdl.IdentifiableValue(pid('boolean')).withMinMax(1, 1).withConstraint(new mdl.BooleanConstraint(true)))
-    .withField(new mdl.IdentifiableValue(id(ns, 'Coded'))
-      .withConstraint(new mdl.CodeConstraint(new mdl.Concept('http://foo.org', 'bar', 'Foobar'))))
+    .withField(new mdl.IdentifiableValue(id(ns, 'Coded')).withMinMax(0, 1)
+      .withConstraint(new mdl.CodeConstraint(new mdl.Concept('http://foo.org', 'bar', 'Foobar'), [pid('code')])))
     .withField(new mdl.IdentifiableValue(id(ns, 'Bool')).withMinMax(0, 1)
       .withConstraint(new mdl.BooleanConstraint(false)));
 
@@ -662,6 +668,58 @@ function addConstConstraints(specs, ns, otherNS, addSubElements=true) {
     addGroup(specs, ns, otherNS, addSubElements);
   }
   return cc;
+}
+
+function addFixedCodeExtravaganza(specs, ns, addSubElements=true) {
+  const fce = new mdl.DataElement(id(ns, 'FixedCodeExtravaganza'), false, false)
+    .withDescription('An element with all sorts of fixed codes.')
+    .withValue(new mdl.ChoiceValue().withMinMax(0, 1)
+      .withOption(new mdl.IdentifiableValue(pid('code')).withMinMax(1, 1)
+        .withConstraint(new mdl.CodeConstraint(new mdl.Concept('http://foo1.org', 'bar1', 'Foobar1')))
+      )
+      .withOption(new mdl.IdentifiableValue(id('shr.core', 'Coding')).withMinMax(1, 1)
+        .withConstraint(new mdl.CodeConstraint(new mdl.Concept('http://foo2.org', 'bar2', 'Foobar2')))
+      )
+    )
+    .withField(new mdl.IdentifiableValue(id('shr.core', 'CodeableConcept')).withMinMax(1, 1)
+      .withConstraint(new mdl.CodeConstraint(new mdl.Concept('http://foo3.org', 'bar3', 'Foobar3')))
+    )
+    .withField(new mdl.IdentifiableValue(id(ns, 'Coded')).withMinMax(1, 1)
+      .withConstraint(new mdl.CodeConstraint(new mdl.Concept('http://foo4.org', 'bar4', 'Foobar4'), [pid('code')]))
+    );
+  add(specs, fce);
+  if (addSubElements) {
+    addCodedElement(specs, ns);
+    addCodeableConcept(specs, addSubElements);
+  }
+
+}
+
+function addCodeableConcept(specs, addSubElements=true) {
+  const cc = new mdl.DataElement(id('shr.core', 'CodeableConcept'), false, false)
+    .withField(new mdl.IdentifiableValue(id('shr.core', 'Coding')).withMinMax(0))
+    .withField(new mdl.IdentifiableValue(id('shr.core', 'DisplayText')).withMinMax(0, 1));
+  add(specs, cc);
+  if (addSubElements) {
+    addCoding(specs);
+  }
+  return cc;
+}
+
+function addCoding(specs) {
+  const coding = new mdl.DataElement(id('shr.core', 'Coding'), false, false)
+    .withValue(new mdl.IdentifiableValue(pid('code')).withMinMax(0, 1))
+    .withField(new mdl.IdentifiableValue(id('shr.core', 'CodeSystem')).withMinMax(0, 1))
+    .withField(new mdl.IdentifiableValue(id('shr.core', 'CodeSystemVersion')).withMinMax(0, 1))
+    .withField(new mdl.IdentifiableValue(id('shr.core', 'DisplayText')).withMinMax(0, 1));
+  const codeSystem = new mdl.DataElement(id('shr.core', 'CodeSystem'), false, false)
+    .withValue(new mdl.IdentifiableValue(pid('uri')).withMinMax(1, 1));
+  const codeSystemVersion = new mdl.DataElement(id('shr.core', 'CodeSystemVersion'), false, false)
+    .withValue(new mdl.IdentifiableValue(pid('string')).withMinMax(1, 1));
+  const displayText = new mdl.DataElement(id('shr.core', 'DisplayText'), false, false)
+    .withValue(new mdl.IdentifiableValue(pid('string')).withMinMax(1, 1));
+  add(specs, coding, codeSystem, codeSystemVersion, displayText);
+  return coding;
 }
 
 function addSimpleChildElement(specs, ns) {
