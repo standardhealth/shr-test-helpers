@@ -665,13 +665,13 @@ function addNestedIncludesTypeConstraints(specs, ns, addSubElements=true) {
 function addIncludesCodeConstraints(specs, ns, addSubElements=true) {
   let de = new mdl.DataElement(id(ns, 'IncludesCodesList'), true)
     .withDescription('An entry with a includes codes constraint.')
-    .withValue(new mdl.IdentifiableValue(id(ns, 'Coded')).withMinMax(0)
+    .withValue(new mdl.IdentifiableValue(id('shr.core', 'CodeableConcept')).withMinMax(0)
       .withConstraint(new mdl.IncludesCodeConstraint(new mdl.Concept('http://foo.org', 'bar', 'Foobar')))
       .withConstraint(new mdl.IncludesCodeConstraint(new mdl.Concept('http://boo.org', 'far', 'Boofar')))
     );
   add(specs, de);
   if (addSubElements) {
-    addCodedElement(specs, ns);
+    addCodeableConcept(specs, addSubElements);
   }
   return de;
 }
