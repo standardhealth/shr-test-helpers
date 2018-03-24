@@ -519,7 +519,7 @@ function addTypeConstrainedElements(specs, ns, otherNS, addSubElements=true) {
       .withBasedOn(id('shr.test', 'Group'))
       .withDescription('It is a derivative of a group of elements with type constraints.')
       .withField(new mdl.IdentifiableValue(id(ns, 'Simple')).withMinMax(1, 1).withConstraint(new mdl.TypeConstraint(id(ns, 'SimpleChild'))))
-      .withField(new mdl.IdentifiableValue(id(ns, 'ElementValue')).withMinMax(0).withConstraint(new mdl.TypeConstraint(id(ns, 'SimpleChild'), undefined, true)))
+      .withField(new mdl.IdentifiableValue(id(ns, 'ElementValue')).withMinMax(0).withConstraint(new mdl.TypeConstraint(id(ns, 'SimpleChild'), undefined, true)));
   add(specs, gd);
   if (addSubElements) {
     addGroup(specs, ns, otherNS, addSubElements);
@@ -540,15 +540,11 @@ function addTypeConstrainedElementsWithPath(specs, ns, addSubElements=true) {
   let cp = new mdl.DataElement(id(ns, 'ConstrainedPath'), true)
       .withBasedOn(id('shr.test', 'NestedField'))
       .withDescription('It derives an element with a nested field.')
-      .withField(new mdl.IdentifiableValue(id(ns, 'TwoDeepElementField')).withConstraint(new mdl.TypeConstraint(id(ns, 'SimpleChild'), [id(ns, 'ElementField'), id(ns, 'Simple')])));
+      .withField(new mdl.IdentifiableValue(id(ns, 'TwoDeepElementField')).withMinMax(0, 1).withConstraint(new mdl.TypeConstraint(id(ns, 'SimpleChild'), [id(ns, 'ElementField'), id(ns, 'Simple')])));
   let cpni = new mdl.DataElement(id(ns, 'ConstrainedPathNoInheritance'), true)
       .withDescription('It has a new field with a nested constraint.')
       .withField(new mdl.IdentifiableValue(id(ns, 'TwoDeepElementField')).withMinMax(0, 1).withConstraint(new mdl.TypeConstraint(id(ns, 'SimpleChild'), [id(ns, 'ElementField'), id(ns, 'Simple')])));
-  add(specs, ef);
-  add(specs, td);
-  add(specs, nf);
-  add(specs, cp);
-  add(specs, cpni);
+  add(specs, ef, td, nf, cp, cpni);
   if (addSubElements) {
     addSimpleElement(specs, ns);
     addSimpleChildElement(specs, ns);
