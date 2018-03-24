@@ -4,7 +4,7 @@ const path = require('path');
 const err = require('./errors.js');
 const mdl = require('shr-models');
 
-function commonExportTests(exportFn, expectedFn, expectedErrorsFn, resultsPath, clean=true) {
+function commonExportTests(exportFn, expectedFn, expectedErrorsFn, fixFn, resultsPath, clean=true) {
   if (typeof expectedErrorsFn === 'undefined') {
     // default to expecting no errors
     expectedErrorsFn = function() { return []; };
@@ -37,8 +37,9 @@ function commonExportTests(exportFn, expectedFn, expectedErrorsFn, resultsPath, 
   return () => {
     let _specs;
     let checkExpected = function(expected) {
+      let result;
       try {
-        const result = exportFn(_specs);
+        result = exportFn(_specs);
         if (resultsPath) {
           // Write out the actual results to the specified path
           const ext = typeof result === 'object' ? 'json' : 'txt';
@@ -50,21 +51,31 @@ function commonExportTests(exportFn, expectedFn, expectedErrorsFn, resultsPath, 
           console.error('Test failed, additional errors that occurred while executing the test are', err.errors());
           fs.writeFileSync(path.join(resultsPath, `${expected.name}_errors.json`), JSON.stringify(err.errors(), null, 2));
         }
+        if (typeof fixFn === 'function') {
+          fixFn(expected.name, result, err.errors());
+        }
         throw ex;
       }
-      if (err.hasErrors()) {
+      if (err.hasErrors() && resultsPath) {
         fs.writeFileSync(path.join(resultsPath, `${expected.name}_errors.json`), JSON.stringify(err.errors(), null, 2));
       }
-      if (err.errors().length !== expected.errors.length) {
-        expect(err.errors()).to.deep.equal(expected.errors);
-      }
-      for (let i=0; i < expected.errors.length; i++) {
-        const expErr = expected.errors[i];
-        const actErr = err.errors()[i];
-        // The expErr will be a subset of the actErr, so just check the keys in expErr
-        for (const key of Object.keys(expErr)) {
-          expect(actErr[key]).to.eql(expErr[key]);
+      try {
+        if (err.errors().length !== expected.errors.length) {
+          expect(err.errors()).to.deep.equal(expected.errors);
         }
+        for (let i=0; i < expected.errors.length; i++) {
+          const expErr = expected.errors[i];
+          const actErr = err.errors()[i];
+          // The expErr will be a subset of the actErr, so just check the keys in expErr
+          for (const key of Object.keys(expErr)) {
+            expect(actErr[key]).to.eql(expErr[key]);
+          }
+        }
+      } catch (e) {
+        if (typeof fixFn === 'function') {
+          fixFn(expected.name, null, err.errors());
+        }
+        throw e;
       }
     };
 
