@@ -243,6 +243,12 @@ function commonExportTests(exportFn, expectedFn, expectedErrorsFn, fixFn, result
       checkExpected(expected);
     });
 
+    it('should correctly export includes type constraints with a zeroed out include type', function() {
+      addIncludesTypeConstraintsWithZeroedOutType(_specs, 'shr.test');
+      const expected = wrappedExpectedFns('IncludesTypeConstraintsZeroedOut', this);
+      checkExpected(expected);
+    });
+
     it('should correctly export includes code constraints', function() {
       addIncludesCodeConstraints(_specs, 'shr.test');
       const expected = wrappedExpectedFns('IncludesCodeConstraints', this);
@@ -612,6 +618,26 @@ function addIncludesTypeConstraints(specs, ns, addSubElements=true) {
       .withValue(new mdl.IdentifiableValue(id(ns, 'Simple')).withMinMax(0)
           .withConstraint(new mdl.IncludesTypeConstraint(id(ns, 'SimpleChild'), new mdl.Cardinality(0, 1)))
           .withConstraint(new mdl.IncludesTypeConstraint(id(ns, 'SimpleChild2'), new mdl.Cardinality(0, 2)))
+  );
+  add(specs, sc2);
+  add(specs, de);
+  if (addSubElements) {
+    addSimpleElement(specs, ns);
+    addSimpleChildElement(specs, ns);
+  }
+  return de;
+}
+
+function addIncludesTypeConstraintsWithZeroedOutType(specs, ns, addSubElements=true) {
+  let sc2 = new mdl.DataElement(id(ns, 'SimpleChild2'), true)
+      .withBasedOn(id(ns, 'Simple'))
+      .withDescription('A derivative of the simple type.')
+      .withValue(new mdl.IdentifiableValue(pid('string')).withMinMax(1, 1));
+  let de = new mdl.DataElement(id(ns, 'IncludesTypesListWithZeroedOutType'), true)
+      .withDescription('An entry with a includes types constraints.')
+      .withValue(new mdl.IdentifiableValue(id(ns, 'Simple')).withMinMax(0)
+          .withConstraint(new mdl.IncludesTypeConstraint(id(ns, 'SimpleChild'), new mdl.Cardinality(0, 1)))
+          .withConstraint(new mdl.IncludesTypeConstraint(id(ns, 'SimpleChild2'), new mdl.Cardinality(0, 0)))
   );
   add(specs, sc2);
   add(specs, de);
