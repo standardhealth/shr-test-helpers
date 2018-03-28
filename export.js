@@ -255,6 +255,12 @@ function commonExportTests(exportFn, expectedFn, expectedErrorsFn, fixFn, result
       checkExpected(expected);
     });
 
+    it('should correctly export nested includes code constraints', function() {
+      addNestedIncludesCodeConstraints(_specs, 'shr.test');
+      const expected = wrappedExpectedFns('NestedIncludesCodeConstraints', this);
+      checkExpected(expected);
+    });
+
     it('should correctly export an element with nested valueset constraints', function() {
       addValueSetConstraints(_specs, 'shr.test', 'shr.other.test');
       const expected = wrappedExpectedFns('NestedValueSetConstraints', this);
@@ -705,6 +711,23 @@ function addIncludesCodeConstraints(specs, ns, addSubElements=true) {
   add(specs, de);
   if (addSubElements) {
     addCodeableConcept(specs, addSubElements);
+  }
+  return de;
+}
+
+function addNestedIncludesCodeConstraints(specs, ns, addSubElements=true) {
+  // NOTE: This tests a suspicious use case, as the includes code resolves to a 1..1 code.  It's the code's parent
+  // that is actually a list -- so the iteration happens one level up.  This test is here because it reflects a real
+  // use case in actual SHR definitions.
+  let de = new mdl.DataElement(id(ns, 'NestedIncludesCodes'), true)
+    .withDescription('An entry with a nested includes codes constraint.')
+    .withValue(new mdl.IdentifiableValue(id('shr.test', 'Coded')).withMinMax(0)
+      .withConstraint(new mdl.IncludesCodeConstraint(new mdl.Concept('http://foo.org', 'bar', 'Foobar'), [pid('code')]))
+      .withConstraint(new mdl.IncludesCodeConstraint(new mdl.Concept('http://boo.org', 'far', 'Boofar'), [pid('code')]))
+    );
+  add(specs, de);
+  if (addSubElements) {
+    addCodedElement(specs, ns);
   }
   return de;
 }
