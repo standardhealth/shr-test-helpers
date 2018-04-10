@@ -21,7 +21,7 @@
   "peerDependencies": {
     "bunyan": "^1.8.9",
     "chai": "^3.5.0",
-    "shr-models": "^5.2.1"
+    "shr-models": "^5.5.0"
   },
   "dependencies": {
     "fs-extra": "^5.0.0"
