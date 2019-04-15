@@ -279,7 +279,7 @@ function commonExportTests(exportFn, expectedFn, expectedErrorsFn, fixFn, result
       checkExpected(expected);
     });
 
-    it('should correctly export an element with code/Coding/CodeableConcept constraints', function() {
+    it('should correctly export an element with code constraints', function() {
       addFixedCodeExtravaganza(_specs, 'shr.test');
       const expected = wrappedExpectedFns('FixedCodeExtravaganza', this);
       checkExpected(expected);
@@ -365,7 +365,7 @@ function addSimpleElement(specs, ns) {
 function addCodedElement(specs, ns) {
   let de = new mdl.DataElement(id(ns, 'Coded'), true)
     .withDescription('It is a coded element')
-    .withValue(new mdl.IdentifiableValue(pid('code')).withMinMax(1, 1)
+    .withValue(new mdl.IdentifiableValue(pid('concept')).withMinMax(1, 1)
       .withConstraint(new mdl.ValueSetConstraint('http://standardhealthrecord.org/test/vs/Coded'))
     );
   add(specs, de);
@@ -427,7 +427,7 @@ function addChoice(specs, ns, addSubElements=true) {
     .withDescription('It is an element with a choice')
     .withValue(new mdl.ChoiceValue().withMinMax(1, 1)
       .withOption(new mdl.IdentifiableValue(pid('string')).withMinMax(1, 1))
-      .withOption(new mdl.IdentifiableValue(pid('code')).withMinMax(1, 1)
+      .withOption(new mdl.IdentifiableValue(pid('concept')).withMinMax(1, 1)
         .withConstraint(new mdl.ValueSetConstraint('http://standardhealthrecord.org/test/vs/CodeChoice'))
       )
       .withOption(new mdl.IdentifiableValue(id('shr.test', 'Coded')).withMinMax(1, 1))
@@ -448,7 +448,7 @@ function addChoiceOfChoice(specs, ns) {
         .withOption(new mdl.IdentifiableValue(pid('integer')).withMinMax(1, 1))
         .withOption(new mdl.IdentifiableValue(pid('decimal')).withMinMax(1, 1))
       )
-      .withOption(new mdl.IdentifiableValue(pid('code')).withMinMax(1, 1)
+      .withOption(new mdl.IdentifiableValue(pid('concept')).withMinMax(1, 1)
         .withConstraint(new mdl.ValueSetConstraint('http://standardhealthrecord.org/test/vs/CodeChoice'))
       )
     );
@@ -701,17 +701,14 @@ function addNestedIncludesTypeConstraints(specs, ns, addSubElements=true) {
   return de;
 }
 
-function addIncludesCodeConstraints(specs, ns, addSubElements=true) {
+function addIncludesCodeConstraints(specs, ns) {
   let de = new mdl.DataElement(id(ns, 'IncludesCodesList'), true)
     .withDescription('An entry with a includes codes constraint.')
-    .withValue(new mdl.IdentifiableValue(id('shr.core', 'CodeableConcept')).withMinMax(0)
+    .withValue(new mdl.IdentifiableValue(pid('concept')).withMinMax(0)
       .withConstraint(new mdl.IncludesCodeConstraint(new mdl.Concept('http://foo.org', 'bar', 'Foobar')))
       .withConstraint(new mdl.IncludesCodeConstraint(new mdl.Concept('http://boo.org', 'far', 'Boofar')))
     );
   add(specs, de);
-  if (addSubElements) {
-    addCodeableConcept(specs, addSubElements);
-  }
   return de;
 }
 
@@ -722,8 +719,8 @@ function addNestedIncludesCodeConstraints(specs, ns, addSubElements=true) {
   let de = new mdl.DataElement(id(ns, 'NestedIncludesCodes'), true)
     .withDescription('An entry with a nested includes codes constraint.')
     .withValue(new mdl.IdentifiableValue(id('shr.test', 'Coded')).withMinMax(0)
-      .withConstraint(new mdl.IncludesCodeConstraint(new mdl.Concept('http://foo.org', 'bar', 'Foobar'), [pid('code')]))
-      .withConstraint(new mdl.IncludesCodeConstraint(new mdl.Concept('http://boo.org', 'far', 'Boofar'), [pid('code')]))
+      .withConstraint(new mdl.IncludesCodeConstraint(new mdl.Concept('http://foo.org', 'bar', 'Foobar'), [pid('concept')]))
+      .withConstraint(new mdl.IncludesCodeConstraint(new mdl.Concept('http://boo.org', 'far', 'Boofar'), [pid('concept')]))
     );
   add(specs, de);
   if (addSubElements) {
@@ -737,7 +734,7 @@ function addValueSetConstraints(specs, ns, otherNS, addSubElements=true) {
       .withBasedOn(id('shr.test', 'Group'))
       .withDescription('It has valueset constraints on a field.')
       .withField(new mdl.IdentifiableValue(id('shr.test', 'Coded')).withMinMax(0, 1)
-        .withConstraint(new mdl.ValueSetConstraint('http://standardhealthrecord.org/test/vs/Coded2', [pid('code')]).withBindingStrength(mdl.REQUIRED))
+        .withConstraint(new mdl.ValueSetConstraint('http://standardhealthrecord.org/test/vs/Coded2', [pid('concept')]).withBindingStrength(mdl.REQUIRED))
   );
   add(specs, gd);
   if (addSubElements) {
@@ -751,12 +748,12 @@ function addValueSetChoiceConstraints(specs, ns, addSubElements=true) {
     .withDescription('An element with a choice of code fields.')
     .withValue(new mdl.ChoiceValue().withMinMax(0, 1)
       .withOption(new mdl.IdentifiableValue(id(ns, 'Coded')).withMinMax(1, 1))
-      .withOption(new mdl.IdentifiableValue(pid('code')).withMinMax(1, 1))
+      .withOption(new mdl.IdentifiableValue(pid('concept')).withMinMax(1, 1))
     );
   let de = new mdl.DataElement(id(ns, 'ChoiceValueSetConstraint'), true)
     .withDescription('It has valueset constraints on a choice field.')
     .withField(new mdl.IdentifiableValue(id(ns, 'CodedChoice')).withMinMax(0, 1)
-      .withConstraint(new mdl.ValueSetConstraint('http://standardhealthrecord.org/test/vs/Coded2', [pid('code')]).withBindingStrength(mdl.PREFERRED))
+      .withConstraint(new mdl.ValueSetConstraint('http://standardhealthrecord.org/test/vs/Coded2', [pid('concept')]).withBindingStrength(mdl.PREFERRED))
     );
   add(specs, cc, de);
   if (addSubElements) {
@@ -774,7 +771,7 @@ function addConstConstraints(specs, ns, otherNS, addSubElements=true) {
     .withDescription('It has boolean and code constraints.')
     .withValue(new mdl.IdentifiableValue(pid('boolean')).withMinMax(1, 1).withConstraint(new mdl.BooleanConstraint(true)))
     .withField(new mdl.IdentifiableValue(id(ns, 'Coded')).withMinMax(0, 1)
-      .withConstraint(new mdl.CodeConstraint(new mdl.Concept('http://foo.org', 'bar', 'Foobar'), [pid('code')])))
+      .withConstraint(new mdl.CodeConstraint(new mdl.Concept('http://foo.org', 'bar', 'Foobar'), [pid('concept')])))
     .withField(new mdl.IdentifiableValue(id(ns, 'Bool')).withMinMax(0, 1)
       .withConstraint(new mdl.BooleanConstraint(false)));
 
@@ -786,55 +783,28 @@ function addConstConstraints(specs, ns, otherNS, addSubElements=true) {
 }
 
 function addFixedCodeExtravaganza(specs, ns, addSubElements=true) {
+  // NOTE: This is considerably less interesting w/ the elimination of Coding and CodeableConcept
   const fce = new mdl.DataElement(id(ns, 'FixedCodeExtravaganza'), false, false)
     .withDescription('An element with all sorts of fixed codes.')
     .withValue(new mdl.ChoiceValue().withMinMax(0, 1)
-      .withOption(new mdl.IdentifiableValue(pid('code')).withMinMax(1, 1)
-        .withConstraint(new mdl.CodeConstraint(new mdl.Concept('http://foo1.org', 'bar1', 'Foobar1')))
+      .withOption(new mdl.IdentifiableValue(pid('Coded')).withMinMax(1, 1)
+        .withConstraint(new mdl.CodeConstraint(new mdl.Concept('http://foo1.org', 'bar1', 'Foobar1'), [pid('concept')]))
       )
-      .withOption(new mdl.IdentifiableValue(id('shr.core', 'Coding')).withMinMax(1, 1)
+      .withOption(new mdl.IdentifiableValue(pid('concept')).withMinMax(1, 1)
         .withConstraint(new mdl.CodeConstraint(new mdl.Concept('http://foo2.org', 'bar2', 'Foobar2')))
       )
     )
-    .withField(new mdl.IdentifiableValue(id('shr.core', 'CodeableConcept')).withMinMax(1, 1)
+    .withField(new mdl.IdentifiableValue(pid('concept')).withMinMax(1, 1)
       .withConstraint(new mdl.CodeConstraint(new mdl.Concept('http://foo3.org', 'bar3', 'Foobar3')))
     )
     .withField(new mdl.IdentifiableValue(id(ns, 'Coded')).withMinMax(1, 1)
-      .withConstraint(new mdl.CodeConstraint(new mdl.Concept('http://foo4.org', 'bar4', 'Foobar4'), [pid('code')]))
+      .withConstraint(new mdl.CodeConstraint(new mdl.Concept('http://foo4.org', 'bar4', 'Foobar4'), [pid('concept')]))
     );
   add(specs, fce);
   if (addSubElements) {
     addCodedElement(specs, ns);
-    addCodeableConcept(specs, addSubElements);
   }
 
-}
-
-function addCodeableConcept(specs, addSubElements=true) {
-  const cc = new mdl.DataElement(id('shr.core', 'CodeableConcept'), false, false)
-    .withField(new mdl.IdentifiableValue(id('shr.core', 'Coding')).withMinMax(0))
-    .withField(new mdl.IdentifiableValue(id('shr.core', 'DisplayText')).withMinMax(0, 1));
-  add(specs, cc);
-  if (addSubElements) {
-    addCoding(specs);
-  }
-  return cc;
-}
-
-function addCoding(specs) {
-  const coding = new mdl.DataElement(id('shr.core', 'Coding'), false, false)
-    .withValue(new mdl.IdentifiableValue(pid('code')).withMinMax(0, 1))
-    .withField(new mdl.IdentifiableValue(id('shr.core', 'CodeSystem')).withMinMax(0, 1))
-    .withField(new mdl.IdentifiableValue(id('shr.core', 'CodeSystemVersion')).withMinMax(0, 1))
-    .withField(new mdl.IdentifiableValue(id('shr.core', 'DisplayText')).withMinMax(0, 1));
-  const codeSystem = new mdl.DataElement(id('shr.core', 'CodeSystem'), false, false)
-    .withValue(new mdl.IdentifiableValue(pid('uri')).withMinMax(1, 1));
-  const codeSystemVersion = new mdl.DataElement(id('shr.core', 'CodeSystemVersion'), false, false)
-    .withValue(new mdl.IdentifiableValue(pid('string')).withMinMax(1, 1));
-  const displayText = new mdl.DataElement(id('shr.core', 'DisplayText'), false, false)
-    .withValue(new mdl.IdentifiableValue(pid('string')).withMinMax(1, 1));
-  add(specs, coding, codeSystem, codeSystemVersion, displayText);
-  return coding;
 }
 
 function addSimpleChildElement(specs, ns) {
