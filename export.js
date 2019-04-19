@@ -288,7 +288,7 @@ function commonExportTests(exportFn, expectedFn, expectedErrorsFn, fixFn, result
 }
 
 function addGroup(specs, ns, otherNS, addSubElements=true) {
-  let gr = new mdl.DataElement(id(ns, 'Group'), true)
+  let gr = new mdl.DataElement(id(ns, 'Group'))
     .withDescription('It is a group of elements')
     .withConcept(new mdl.Concept('http://foo.org', 'bar', 'Foobar'))
     .withConcept(new mdl.Concept('http://boo.org', 'far', 'Boofar'))
@@ -307,7 +307,7 @@ function addGroup(specs, ns, otherNS, addSubElements=true) {
 }
 
 function addGroupWithChoiceOfChoice(specs, ns, otherNS, addSubElements=true) {
-  let gr = new mdl.DataElement(id(ns, 'GroupWithChoiceOfChoice'), true)
+  let gr = new mdl.DataElement(id(ns, 'GroupWithChoiceOfChoice'))
     .withValue(new mdl.ChoiceValue().withMinMax(0,2)
       .withOption(new mdl.IdentifiableValue(id('shr.other.test', 'Simple')).withMinMax(1, 1))
       .withOption(new mdl.ChoiceValue().withMinMax(1, 1)
@@ -329,7 +329,7 @@ function addGroupWithChoiceOfChoice(specs, ns, otherNS, addSubElements=true) {
 }
 
 function addGroupPathClash(specs, ns, nsOther, addSubElements=true) {
-  let gr = new mdl.DataElement(id(ns, 'GroupPathClash'), true)
+  let gr = new mdl.DataElement(id(ns, 'GroupPathClash'))
     .withDescription('It is a group of elements with clashing names')
     .withField(new mdl.IdentifiableValue(id('shr.test', 'Simple')).withMinMax(1, 1))
     .withField(new mdl.IdentifiableValue(id('shr.other.test', 'Simple')).withMinMax(0, 1));
@@ -342,7 +342,7 @@ function addGroupPathClash(specs, ns, nsOther, addSubElements=true) {
 }
 
 function addGroupDerivative(specs, ns, otherNS, addSubElements=true) {
-  let gd = new mdl.DataElement(id(ns, 'GroupDerivative'), true)
+  let gd = new mdl.DataElement(id(ns, 'GroupDerivative'))
     .withBasedOn(id('shr.test', 'Group'))
     .withDescription('It is a derivative of a group of elements')
     .withValue(new mdl.IdentifiableValue(pid('string')).withMinMax(1, 1));
@@ -353,8 +353,8 @@ function addGroupDerivative(specs, ns, otherNS, addSubElements=true) {
   return gd;
 }
 
-function addSimpleElement(specs, ns) {
-  let de = new mdl.DataElement(id(ns, 'Simple'), true)
+function addSimpleElement(specs, ns, isEntry=false) {
+  let de = new mdl.DataElement(id(ns, 'Simple'), isEntry)
     .withDescription('It is a simple element')
     .withConcept(new mdl.Concept('http://foo.org', 'bar', 'Foobar'))
     .withValue(new mdl.IdentifiableValue(pid('string')).withMinMax(1, 1));
@@ -362,8 +362,12 @@ function addSimpleElement(specs, ns) {
   return de;
 }
 
-function addCodedElement(specs, ns) {
-  let de = new mdl.DataElement(id(ns, 'Coded'), true)
+function addSimpleEntry(specs, ns) {
+  return addSimpleElement(specs, ns, true);
+}
+
+function addCodedElement(specs, ns, isEntry=false) {
+  let de = new mdl.DataElement(id(ns, 'Coded'), isEntry)
     .withDescription('It is a coded element')
     .withValue(new mdl.IdentifiableValue(pid('concept')).withMinMax(1, 1)
       .withConstraint(new mdl.ValueSetConstraint('http://standardhealthrecord.org/test/vs/Coded'))
@@ -372,27 +376,38 @@ function addCodedElement(specs, ns) {
   return de;
 }
 
-function addSimpleReference(specs, ns) {
-  let de = new mdl.DataElement(id(ns, 'SimpleReference'), true)
+function addCodedEntry(specs, ns) {
+  return addCodedElement(specs, ns, true);
+}
+
+function addSimpleReference(specs, ns, addSubElement=true) {
+  let de = new mdl.DataElement(id(ns, 'SimpleReference'))
     .withDescription('It is a reference to a simple element')
-    .withValue(new mdl.RefValue(id(ns, 'Simple')).withMinMax(1, 1));
+    .withValue(new mdl.IdentifiableValue(id(ns, 'Simple')).withMinMax(1, 1)); // Reference to Entry
   add(specs, de);
+  if (addSubElement) {
+    addSimpleEntry(specs, ns);
+  }
   return de;
 }
 
-function addReferenceChoice(specs, ns, otherNS) {
-  let ch = new mdl.DataElement(id(ns, 'ReferenceChoice'), true)
+function addReferenceChoice(specs, ns, otherNS, addSubElement=true) {
+  let ch = new mdl.DataElement(id(ns, 'ReferenceChoice'))
       .withDescription('It is a reference to one of a few types')
       .withValue(new mdl.ChoiceValue().withMinMax(1, 1)
-          .withOption(new mdl.RefValue(id(otherNS, 'Simple')).withMinMax(1, 1))
-          .withOption(new mdl.RefValue(id(ns, 'Coded')).withMinMax(1, 1))
+          .withOption(new mdl.IdentifiableValue(id(otherNS, 'Simple')).withMinMax(1, 1)) // Reference to Entry
+          .withOption(new mdl.IdentifiableValue(id(ns, 'Coded')).withMinMax(1, 1)) // Reference to Entry
       );
   add(specs, ch);
+  if (addSubElement) {
+    addSimpleEntry(specs, otherNS);
+    addCodedEntry(specs, ns);
+  }
   return ch;
 }
 
 function addTwoDeepElementValue(specs, ns, addSubElement=true) {
-  let de = new mdl.DataElement(id(ns, 'TwoDeepElementValue'), true)
+  let de = new mdl.DataElement(id(ns, 'TwoDeepElementValue'))
     .withDescription('It is an element with a two-deep element value')
     .withValue(new mdl.IdentifiableValue(id(ns, 'ElementValue')).withMinMax(1, 1));
   add(specs, de);
@@ -403,7 +418,7 @@ function addTwoDeepElementValue(specs, ns, addSubElement=true) {
 }
 
 function addElementValue(specs, ns, addSubElement=true) {
-  let de = new mdl.DataElement(id(ns, 'ElementValue'), true)
+  let de = new mdl.DataElement(id(ns, 'ElementValue'))
     .withDescription('It is an element with an element value')
     .withValue(new mdl.IdentifiableValue(id(ns, 'Simple')).withMinMax(1, 1));
   add(specs, de);
@@ -414,7 +429,7 @@ function addElementValue(specs, ns, addSubElement=true) {
 }
 
 function addForeignElementValue(specs, ns, otherNS) {
-  let de = new mdl.DataElement(id(ns, 'ForeignElementValue'), true)
+  let de = new mdl.DataElement(id(ns, 'ForeignElementValue'))
     .withDescription('It is an element with a foreign element value')
     .withValue(new mdl.IdentifiableValue(id(otherNS, 'Simple')).withMinMax(1, 1));
   add(specs, de);
@@ -423,7 +438,7 @@ function addForeignElementValue(specs, ns, otherNS) {
 }
 
 function addChoice(specs, ns, addSubElements=true) {
-  let ch = new mdl.DataElement(id(ns, 'Choice'), true)
+  let ch = new mdl.DataElement(id(ns, 'Choice'))
     .withDescription('It is an element with a choice')
     .withValue(new mdl.ChoiceValue().withMinMax(1, 1)
       .withOption(new mdl.IdentifiableValue(pid('string')).withMinMax(1, 1))
@@ -440,7 +455,7 @@ function addChoice(specs, ns, addSubElements=true) {
 }
 
 function addChoiceOfChoice(specs, ns) {
-  let de = new mdl.DataElement(id(ns, 'ChoiceOfChoice'), true)
+  let de = new mdl.DataElement(id(ns, 'ChoiceOfChoice'))
     .withDescription('It is an element with a choice containing a choice')
     .withValue(new mdl.ChoiceValue().withMinMax(1, 1)
       .withOption(new mdl.IdentifiableValue(pid('string')).withMinMax(1, 1))
@@ -457,7 +472,7 @@ function addChoiceOfChoice(specs, ns) {
 }
 
 function addTBDElement(specs, ns) {
-  let de = new mdl.DataElement(id(ns, 'NotDone'), true)
+  let de = new mdl.DataElement(id(ns, 'NotDone'))
       .withDescription('It is an unfinished element')
       .withConcept(new mdl.Concept('http://foo.org', 'bar', 'Foobar'))
       .withValue(new mdl.TBD('An undetermined value.').withMinMax(1, 1))
@@ -469,7 +484,7 @@ function addTBDElement(specs, ns) {
 }
 
 function addTBDElementDerivative(specs, ns, addSubElements=true) {
-  let de = new mdl.DataElement(id(ns, 'NotDoneDerivative'), true)
+  let de = new mdl.DataElement(id(ns, 'NotDoneDerivative'))
       .withBasedOn(new mdl.TBD('An undetermined parent.'))
       .withBasedOn(new mdl.TBD())
       .withBasedOn(id('shr.test', 'ValuelessElement'))
@@ -479,7 +494,7 @@ function addTBDElementDerivative(specs, ns, addSubElements=true) {
       .withField(new mdl.TBD('An undetermined singular field.').withMinMax(1, 1));
   add(specs, de);
   if (addSubElements) {
-    add(specs, new mdl.DataElement(id(ns, 'ValuelessElement'), true)
+    add(specs, new mdl.DataElement(id(ns, 'ValuelessElement'))
         .withDescription('An element with no value.')
         .withField(new mdl.IdentifiableValue(id('shr.test', 'Simple')).withMinMax(1, 1)));
     addSimpleElement(specs, ns);
@@ -488,7 +503,7 @@ function addTBDElementDerivative(specs, ns, addSubElements=true) {
 }
 
 function addAbstractAndPlainElements(specs, ns, addSubElements=true) {
-  let gr = new mdl.DataElement(id(ns, 'AbstractAndPlainGroup'), true, true)
+  let gr = new mdl.DataElement(id(ns, 'AbstractAndPlainGroup'), false, true)
       .withDescription('It is an abstract group of elements')
       .withConcept(new mdl.Concept('http://foo.org', 'bar', 'Foobar'))
       .withField(new mdl.IdentifiableValue(id('shr.test', 'Simple')).withMinMax(1, 1))
@@ -511,7 +526,7 @@ function addNestedCardConstrainedElement(specs, ns, addSubElements=true) {
   let of = new mdl.DataElement(id(ns, 'OptionalField'))
     .withDescription('An element with an optional field.')
     .withField(new mdl.IdentifiableValue(id(ns, 'OptionalValue')).withMinMax(0, 1));
-  let de = new mdl.DataElement(id(ns, 'NestedCardConstraint'), true)
+  let de = new mdl.DataElement(id(ns, 'NestedCardConstraint'))
       .withDescription('It has a field with a nested card constraint.')
       .withField(new mdl.IdentifiableValue(id(ns, 'OptionalField'))
         .withMinMax(1, 1)
@@ -527,7 +542,7 @@ function addNestedListCardConstrainedElements(specs, ns, addSubElements=true) {
   let of = new mdl.DataElement(id(ns, 'ListField'))
       .withDescription('An element with a list field.')
       .withField(new mdl.IdentifiableValue(id(ns, 'OptionalList')).withMinMax(1, 1));
-  let de = new mdl.DataElement(id(ns, 'NestedListCardConstraints'), true)
+  let de = new mdl.DataElement(id(ns, 'NestedListCardConstraints'))
       .withDescription('It has a field with a nested card constraint on a list.')
       .withField(new mdl.IdentifiableValue(id(ns, 'ListField'))
           .withMinMax(1, 1)
@@ -538,7 +553,7 @@ function addNestedListCardConstrainedElements(specs, ns, addSubElements=true) {
 
 function addTypeConstrainedElements(specs, ns, otherNS, addSubElements=true) {
   addSimpleChildElement(specs, ns);
-  let gd = new mdl.DataElement(id(ns, 'GroupDerivative'), true)
+  let gd = new mdl.DataElement(id(ns, 'GroupDerivative'))
       .withBasedOn(id('shr.test', 'Group'))
       .withDescription('It is a derivative of a group of elements with type constraints.')
       .withField(new mdl.IdentifiableValue(id(ns, 'Simple')).withMinMax(1, 1).withConstraint(new mdl.TypeConstraint(id(ns, 'SimpleChild'))))
@@ -551,20 +566,20 @@ function addTypeConstrainedElements(specs, ns, otherNS, addSubElements=true) {
 }
 
 function addTypeConstrainedElementsWithPath(specs, ns, addSubElements=true) {
-  let ef = new mdl.DataElement(id(ns, 'ElementField'), true)
+  let ef = new mdl.DataElement(id(ns, 'ElementField'))
       .withDescription('It is an element with a field.')
       .withField(new mdl.IdentifiableValue(id(ns, 'Simple')).withMinMax(1, 1));
-  let td = new mdl.DataElement(id(ns, 'TwoDeepElementField'), true)
+  let td = new mdl.DataElement(id(ns, 'TwoDeepElementField'))
       .withDescription('It is an element with a two-deep element field')
       .withField(new mdl.IdentifiableValue(id(ns, 'ElementField')).withMinMax(1, 1));
-  let nf = new mdl.DataElement(id(ns, 'NestedField'), true)
+  let nf = new mdl.DataElement(id(ns, 'NestedField'))
       .withDescription('It is an element with a nested field.')
       .withField(new mdl.IdentifiableValue(id(ns, 'TwoDeepElementField')).withMinMax(0, 1));
-  let cp = new mdl.DataElement(id(ns, 'ConstrainedPath'), true)
+  let cp = new mdl.DataElement(id(ns, 'ConstrainedPath'))
       .withBasedOn(id('shr.test', 'NestedField'))
       .withDescription('It derives an element with a nested field.')
       .withField(new mdl.IdentifiableValue(id(ns, 'TwoDeepElementField')).withMinMax(0, 1).withConstraint(new mdl.TypeConstraint(id(ns, 'SimpleChild'), [id(ns, 'ElementField'), id(ns, 'Simple')])));
-  let cpni = new mdl.DataElement(id(ns, 'ConstrainedPathNoInheritance'), true)
+  let cpni = new mdl.DataElement(id(ns, 'ConstrainedPathNoInheritance'))
       .withDescription('It has a new field with a nested constraint.')
       .withField(new mdl.IdentifiableValue(id(ns, 'TwoDeepElementField')).withMinMax(0, 1).withConstraint(new mdl.TypeConstraint(id(ns, 'SimpleChild'), [id(ns, 'ElementField'), id(ns, 'Simple')])));
   add(specs, ef, td, nf, cp, cpni);
@@ -576,18 +591,18 @@ function addTypeConstrainedElementsWithPath(specs, ns, addSubElements=true) {
 }
 
 function addTypeConstrainedChoices(specs, ns, addSubElements=true) {
-  let tcc = new mdl.DataElement(id(ns, 'TypeConstrainedChoice'), true)
+  let tcc = new mdl.DataElement(id(ns, 'TypeConstrainedChoice'))
     .withDescription('It is an element with a choice with a constraint.')
     .withField(new mdl.IdentifiableValue(id(ns, 'Choice')).withMinMax(1, 1)
       .withConstraint(new mdl.TypeConstraint(pid('string')).withOnValue(true))
     );
-  let cv = new mdl.DataElement(id(ns, 'ChoiceValue'), true)
+  let cv = new mdl.DataElement(id(ns, 'ChoiceValue'))
     .withDescription('It is an element with a choice value.')
     .withValue(new mdl.IdentifiableValue(id(ns, 'Choice')).withMinMax(1, 1));
-  let td = new mdl.DataElement(id(ns, 'TwoDeepChoiceField'), true)
+  let td = new mdl.DataElement(id(ns, 'TwoDeepChoiceField'))
     .withDescription('It is an element with a a field with a choice.')
     .withField(new mdl.IdentifiableValue(id(ns, 'ChoiceValue')).withMinMax(0, 1));
-  let tccp = new mdl.DataElement(id(ns, 'TypeConstrainedChoiceWithPath'), true)
+  let tccp = new mdl.DataElement(id(ns, 'TypeConstrainedChoiceWithPath'))
     .withDescription('It is an element with a choice on a field with a constraint.')
     .withField(new mdl.IdentifiableValue(id(ns, 'TwoDeepChoiceField')).withMinMax(0, 1)
       .withConstraint(new mdl.TypeConstraint(id(ns, 'Coded'), [id(ns, 'ChoiceValue'), id(ns, 'Choice')], true))
@@ -600,26 +615,26 @@ function addTypeConstrainedChoices(specs, ns, addSubElements=true) {
 }
 
 function addTypeConstrainedReference(specs, ns, addSubElements=true) {
-  let de = new mdl.DataElement(id(ns, 'TypeConstrainedReference'), true)
+  let de = new mdl.DataElement(id(ns, 'TypeConstrainedReference'))
     .withBasedOn(id(ns, 'SimpleReference'))
     .withDescription('It is an element a constraint on a reference.')
-    .withValue(new mdl.RefValue(id(ns, 'Simple')).withMinMax(1, 1)
+    .withValue(new mdl.IdentifiableValue(id(ns, 'Simple')).withMinMax(1, 1) // Reference to Entry
       .withConstraint(new mdl.TypeConstraint(id(ns, 'SimpleChild'))));
   add(specs, de);
   if (addSubElements) {
-    addSimpleElement(specs, ns);
-    addSimpleChildElement(specs, ns);
+    addSimpleEntry(specs, ns);
+    addSimpleChildEntry(specs, ns);
     addSimpleReference(specs, ns);
   }
   return de;
 }
 
 function addIncludesTypeConstraints(specs, ns, addSubElements=true) {
-  let sc2 = new mdl.DataElement(id(ns, 'SimpleChild2'), true)
+  let sc2 = new mdl.DataElement(id(ns, 'SimpleChild2'))
       .withBasedOn(id(ns, 'Simple'))
       .withDescription('A derivative of the simple type.')
       .withValue(new mdl.IdentifiableValue(pid('string')).withMinMax(1, 1));
-  let de = new mdl.DataElement(id(ns, 'IncludesTypesList'), true)
+  let de = new mdl.DataElement(id(ns, 'IncludesTypesList'))
       .withDescription('An entry with a includes types constraints.')
       .withValue(new mdl.IdentifiableValue(id(ns, 'Simple')).withMinMax(0)
           .withConstraint(new mdl.IncludesTypeConstraint(id(ns, 'SimpleChild'), new mdl.Cardinality(0, 1)))
@@ -635,11 +650,11 @@ function addIncludesTypeConstraints(specs, ns, addSubElements=true) {
 }
 
 function addIncludesTypeConstraintsWithZeroedOutType(specs, ns, addSubElements=true) {
-  let sc2 = new mdl.DataElement(id(ns, 'SimpleChild2'), true)
+  let sc2 = new mdl.DataElement(id(ns, 'SimpleChild2'))
       .withBasedOn(id(ns, 'Simple'))
       .withDescription('A derivative of the simple type.')
       .withValue(new mdl.IdentifiableValue(pid('string')).withMinMax(1, 1));
-  let de = new mdl.DataElement(id(ns, 'IncludesTypesListWithZeroedOutType'), true)
+  let de = new mdl.DataElement(id(ns, 'IncludesTypesListWithZeroedOutType'))
       .withDescription('An entry with a includes types constraints.')
       .withValue(new mdl.IdentifiableValue(id(ns, 'Simple')).withMinMax(0)
           .withConstraint(new mdl.IncludesTypeConstraint(id(ns, 'SimpleChild'), new mdl.Cardinality(0, 1)))
@@ -658,11 +673,11 @@ function addOnValueIncludesTypeConstraints(specs, ns, addSubElements=true) {
   let evl = new mdl.DataElement(id(ns, 'ElementValueList'), false, false)
       .withDescription('It is an element with a value that is a list of elements')
       .withValue(new mdl.IdentifiableValue(id(ns, 'Simple')).withMinMax(0));
-  let sc2 = new mdl.DataElement(id(ns, 'SimpleChild2'), true)
+  let sc2 = new mdl.DataElement(id(ns, 'SimpleChild2'))
       .withBasedOn(id(ns, 'Simple'))
       .withDescription('A derivative of the simple type.')
       .withValue(new mdl.IdentifiableValue(pid('string')).withMinMax(1, 1));
-  let de = new mdl.DataElement(id(ns, 'OnValueIncludesTypeConstraints'), true)
+  let de = new mdl.DataElement(id(ns, 'OnValueIncludesTypeConstraints'))
       .withDescription('An entry with includes types constraints that are on the value of the field.')
       .withField(new mdl.IdentifiableValue(id(ns, 'ElementValueList')).withMinMax(0, 1)
         .withConstraint(new mdl.IncludesTypeConstraint(id(ns, 'SimpleChild'), new mdl.Cardinality(0, 1), [], true))
@@ -683,11 +698,11 @@ function addNestedIncludesTypeConstraints(specs, ns, addSubElements=true) {
   let eflc = new mdl.DataElement(id(ns, 'ElementFieldListContainer'), false, false)
       .withDescription('It is an element with a field that contains an element with a field that is a list of elements')
       .withField(new mdl.IdentifiableValue(id(ns, 'ElementFieldList')).withMinMax(0,1));
-  let sc2 = new mdl.DataElement(id(ns, 'SimpleChild2'), true)
+  let sc2 = new mdl.DataElement(id(ns, 'SimpleChild2'))
       .withBasedOn(id(ns, 'Simple'))
       .withDescription('A derivative of the simple type.')
       .withValue(new mdl.IdentifiableValue(pid('string')).withMinMax(1, 1));
-  let de = new mdl.DataElement(id(ns, 'NestedIncludesTypeConstraints'), true)
+  let de = new mdl.DataElement(id(ns, 'NestedIncludesTypeConstraints'))
       .withDescription('An entry with includes types constraints that are on a nested field.')
       .withField(new mdl.IdentifiableValue(id(ns, 'ElementFieldListContainer')).withMinMax(0, 1)
         .withConstraint(new mdl.IncludesTypeConstraint(id(ns, 'SimpleChild'), new mdl.Cardinality(0, 1), [id(ns, 'ElementFieldList'), id(ns, 'Simple')], false))
@@ -702,7 +717,7 @@ function addNestedIncludesTypeConstraints(specs, ns, addSubElements=true) {
 }
 
 function addIncludesCodeConstraints(specs, ns) {
-  let de = new mdl.DataElement(id(ns, 'IncludesCodesList'), true)
+  let de = new mdl.DataElement(id(ns, 'IncludesCodesList'))
     .withDescription('An entry with a includes codes constraint.')
     .withValue(new mdl.IdentifiableValue(pid('concept')).withMinMax(0)
       .withConstraint(new mdl.IncludesCodeConstraint(new mdl.Concept('http://foo.org', 'bar', 'Foobar')))
@@ -716,7 +731,7 @@ function addNestedIncludesCodeConstraints(specs, ns, addSubElements=true) {
   // NOTE: This tests a suspicious use case, as the includes code resolves to a 1..1 code.  It's the code's parent
   // that is actually a list -- so the iteration happens one level up.  This test is here because it reflects a real
   // use case in actual SHR definitions.
-  let de = new mdl.DataElement(id(ns, 'NestedIncludesCodes'), true)
+  let de = new mdl.DataElement(id(ns, 'NestedIncludesCodes'))
     .withDescription('An entry with a nested includes codes constraint.')
     .withValue(new mdl.IdentifiableValue(id('shr.test', 'Coded')).withMinMax(0)
       .withConstraint(new mdl.IncludesCodeConstraint(new mdl.Concept('http://foo.org', 'bar', 'Foobar'), [pid('concept')]))
@@ -730,7 +745,7 @@ function addNestedIncludesCodeConstraints(specs, ns, addSubElements=true) {
 }
 
 function addValueSetConstraints(specs, ns, otherNS, addSubElements=true) {
-  let gd = new mdl.DataElement(id(ns, 'NestedValueSetConstraints'), true)
+  let gd = new mdl.DataElement(id(ns, 'NestedValueSetConstraints'))
       .withBasedOn(id('shr.test', 'Group'))
       .withDescription('It has valueset constraints on a field.')
       .withField(new mdl.IdentifiableValue(id('shr.test', 'Coded')).withMinMax(0, 1)
@@ -744,13 +759,13 @@ function addValueSetConstraints(specs, ns, otherNS, addSubElements=true) {
 }
 
 function addValueSetChoiceConstraints(specs, ns, addSubElements=true) {
-  let cc = new mdl.DataElement(id(ns, 'CodedChoice'), true)
+  let cc = new mdl.DataElement(id(ns, 'CodedChoice'))
     .withDescription('An element with a choice of code fields.')
     .withValue(new mdl.ChoiceValue().withMinMax(0, 1)
       .withOption(new mdl.IdentifiableValue(id(ns, 'Coded')).withMinMax(1, 1))
       .withOption(new mdl.IdentifiableValue(pid('concept')).withMinMax(1, 1))
     );
-  let de = new mdl.DataElement(id(ns, 'ChoiceValueSetConstraint'), true)
+  let de = new mdl.DataElement(id(ns, 'ChoiceValueSetConstraint'))
     .withDescription('It has valueset constraints on a choice field.')
     .withField(new mdl.IdentifiableValue(id(ns, 'CodedChoice')).withMinMax(0, 1)
       .withConstraint(new mdl.ValueSetConstraint('http://standardhealthrecord.org/test/vs/Coded2', [pid('concept')]).withBindingStrength(mdl.PREFERRED))
@@ -766,7 +781,7 @@ function addConstConstraints(specs, ns, otherNS, addSubElements=true) {
   let bl = new mdl.DataElement(id(ns, 'Bool'), false)
     .withDescription('A boolean element.')
       .withValue(new mdl.IdentifiableValue(pid('boolean')).withMinMax(0, 1));
-  let cc = new mdl.DataElement(id(ns, 'BooleanAndCodeConstraints'), true)
+  let cc = new mdl.DataElement(id(ns, 'BooleanAndCodeConstraints'))
     .withBasedOn(id('shr.test', 'Group'))
     .withDescription('It has boolean and code constraints.')
     .withValue(new mdl.IdentifiableValue(pid('boolean')).withMinMax(1, 1).withConstraint(new mdl.BooleanConstraint(true)))
@@ -807,12 +822,16 @@ function addFixedCodeExtravaganza(specs, ns, addSubElements=true) {
 
 }
 
-function addSimpleChildElement(specs, ns) {
-  let sc1 = new mdl.DataElement(id(ns, 'SimpleChild'), true)
+function addSimpleChildElement(specs, ns, isEntry=false) {
+  let sc1 = new mdl.DataElement(id(ns, 'SimpleChild'), isEntry)
       .withBasedOn(id(ns, 'Simple'))
       .withDescription('A derivative of the simple type.')
       .withValue(new mdl.IdentifiableValue(pid('string')).withMinMax(1, 1));
   add(specs, sc1);
+}
+
+function addSimpleChildEntry(specs, ns) {
+  addSimpleChildElement(specs, ns, true);
 }
 
 function add(specs, ...dataElements) {
