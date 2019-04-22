@@ -49,8 +49,10 @@ function commonExportTests(exportFn, expectedFn, expectedErrorsFn, fixFn, result
       } catch (ex) {
         if (err.errors().length) {
           console.error('Test failed, additional errors that occurred while executing the test are', err.errors());
+          if (resultsPath) {
             fs.writeFileSync(path.join(resultsPath, `${expected.name}_errors.json`), JSON.stringify(err.errors(), null, 2));
           }
+        }
         if (typeof fixFn === 'function') {
           fixFn(expected.name, result, err.errors());
         }
