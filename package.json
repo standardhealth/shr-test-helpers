@@ -1,6 +1,6 @@
 {
   "name": "shr-test-helpers",
-  "version": "6.0.0-beta.1",
+  "version": "6.0.0-beta.2",
   "description": "Re-usable classes and functions for testing SHR tools",
   "author": "",
   "license": "Apache-2.0",
@@ -21,7 +21,7 @@
   "peerDependencies": {
     "bunyan": "^1.8.9",
     "chai": "^3.5.0",
-    "shr-models": "^6.0.0-beta.1"
+    "shr-models": "^6.0.0-beta.2"
   },
   "dependencies": {
     "fs-extra": "^5.0.0"
